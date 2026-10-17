@@ -29,3 +29,10 @@ const ICONS = (() => {
     close: s('<path d="M6 6l12 12M18 6 6 18"/>')
   };
 })();
+Object.assign(ICONS, {
+  sup: '<svg viewBox="0 0 24 24"><path d="m4 19 8-9M12 19 4 10"/><path d="M16 8c0-1 .8-2 2-2s2 .8 2 1.800c0 1.500-4 2.200-4 4.200h4"/></svg>',
+  sub: '<svg viewBox="0 0 24 24"><path d="m4 5 8 9M12 5l-8 9"/><path d="M16 17c0-1 .8-2 2-2s2 .8 2 1.800c0 1.500-4 2.200-4 4.200h4"/></svg>',
+  clear: '<svg viewBox="0 0 24 24"><path d="m7 21-4-4 10-12 7 7-8 9z"/><path d="M7 21h13"/></svg>',
+  rtl: '<svg viewBox="0 0 24 24"><path d="M10 4h8M14 4v10M18 4v10M10 4a4 4 0 0 0 0 8h4"/><path d="M5 18h14M8 15l-3 3 3 3"/></svg>',
+  upload: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 16v-5M9.500 13.500 12 11l2.500 2.500"/></svg>'
+});

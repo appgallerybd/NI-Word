@@ -11,9 +11,10 @@
   <button data-act="docs" data-icon="folder" title="আমার ডকুমেন্ট"></button>
   <input id="title" value="নামহীন ডকুমেন্ট" aria-label="ডকুমেন্টের নাম">
   <span id="saved" class="saved"></span>
+  <button data-act="open" data-icon="upload" title="ফাইল খুলুন (.docx, .html, .txt)"></button>
   <button data-act="undo" data-icon="undo" title="Undo"></button>
   <button data-act="redo" data-icon="redo" title="Redo"></button>
-  <button data-act="docx" data-icon="download" title="Word (.doc) ডাউনলোড"></button>
+  <button data-act="docx" data-icon="download" title="Word (.docx) ডাউনলোড"></button>
 </header>
 
 <nav class="tabs">
@@ -42,6 +43,9 @@
     <button data-cmd="italic" data-icon="italic" title="Italic"></button>
     <button data-cmd="underline" data-icon="underline" title="Underline"></button>
     <button data-cmd="strikeThrough" data-icon="strike" title="Strikethrough"></button>
+    <button data-cmd="superscript" data-icon="sup" title="Superscript"></button>
+    <button data-cmd="subscript" data-icon="sub" title="Subscript"></button>
+    <button data-cmd="removeFormat" data-icon="clear" title="ফরম্যাট মুছুন"></button>
     <label class="clr" title="টেক্সটের রঙ"><span data-icon="textcolor"></span><input type="color" id="fore" value="#c00000"></label>
     <label class="clr" title="হাইলাইট"><span data-icon="marker"></span><input type="color" id="back" value="#ffff00"></label>
     <i class="sep"></i>
@@ -49,6 +53,7 @@
     <button data-cmd="justifyCenter" data-icon="alignC" title="মাঝে"></button>
     <button data-cmd="justifyRight" data-icon="alignR" title="ডানে"></button>
     <button data-cmd="justifyFull" data-icon="alignJ" title="জাস্টিফাই"></button>
+    <button data-act="rtl" data-icon="rtl" title="ডান-থেকে-বামে (আরবি/উর্দু)"></button>
     <i class="sep"></i>
     <button data-cmd="insertUnorderedList" data-icon="ul" title="বুলেট"></button>
     <button data-cmd="insertOrderedList" data-icon="ol" title="নম্বর"></button>
@@ -87,6 +92,12 @@
     </select>
     <button data-act="find" data-icon="find" title="খুঁজুন ও বদলান"></button>
     <button data-act="print" data-icon="print" title="প্রিন্ট / PDF"></button>
+    <i class="sep"></i>
+    <button class="t" data-act="docx">.docx</button>
+    <button class="t" data-act="doc">.doc</button>
+    <button class="t" data-act="html">HTML</button>
+    <button class="t" data-act="txt">টেক্সট</button>
+    <input type="file" id="opener" accept=".docx,.html,.htm,.doc,.txt" hidden>
   </div>
 </section>
 
@@ -113,6 +124,8 @@
 
 <script src="js/icons.js"></script>
 <script src="js/storage.js"></script>
+<script src="js/zip.js"></script>
+<script src="js/docx.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

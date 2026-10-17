@@ -99,7 +99,12 @@
     docs: openDocs,
     undo: () => exec('undo'),
     redo: () => exec('redo'),
-    docx: exportDoc,
+    docx: () => dl(DOCX.blob(ed, sheet.style.getPropertyValue('--m')), nm() + '.docx'),
+    doc: exportDoc,
+    html: () => dl(new Blob(['<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><title>' + nm().replace(/</g, '&lt;') + '</title></head><body>' + ed.innerHTML + '</body></html>'], { type: 'text/html' }), nm() + '.html'),
+    txt: () => dl(new Blob([ed.innerText], { type: 'text/plain' }), nm() + '.txt'),
+    open: () => $('#opener').click(),
+    rtl: () => { restore(); const r = getSelection().getRangeAt(0); [...ed.children].filter(n => r.intersectsNode(n)).forEach(n => { n.dir = n.dir === 'rtl' ? 'ltr' : 'rtl'; }); changed(); },
     print: () => print(),
     hr: () => exec('insertHorizontalRule'),
     pagebreak: () => exec('insertHTML', '<div class="pb"></div><p><br></p>'),
@@ -149,7 +154,30 @@
     if (w) { e.target.style.width = w + 'px'; changed(); }
   });
 
-  /* ---- export ---- */
+  /* ---- export / import ---- */
+  const nm = () => titleEl.value || 'document';
+  const dl = (blob, name) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  $('#opener').onchange = async e => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    try {
+      const ext = f.name.split('.').pop().toLowerCase();
+      let html;
+      if (ext === 'docx') html = await DOCX.toHtml(await f.arrayBuffer());
+      else if (ext === 'txt') html = (await f.text()).split(/\r?\n/).map(l => '<p>' + (l.replace(/&/g, '&amp;').replace(/</g, '&lt;') || '<br>') + '</p>').join('');
+      else html = DOCX.clean(await f.text());
+      await save(); fresh();
+      ed.innerHTML = html || '<p><br></p>';
+      titleEl.value = f.name.replace(/\.[^.]+$/, '');
+      changed();
+    } catch (err) { alert('ফাইলটি খোলা যায়নি: ' + err.message); }
+  };
+
   function exportDoc() {
     const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>table{border-collapse:collapse}td{border:1px solid #000;padding:4px}body{font-family:Arial;font-size:12pt}</style></head><body>' + ed.innerHTML + '</body></html>';
     const a = document.createElement('a');
