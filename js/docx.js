@@ -73,7 +73,7 @@ const DOCX = (() => {
     const ctx = { media: [] }, out = [];
     ed.childNodes.forEach(n => {
       if (n.nodeType === 3) { if (n.nodeValue.trim()) out.push(`<w:p>${run(n.nodeValue, {})}</w:p>`); return; }
-      if (n.nodeType !== 1) return;
+      if (n.nodeType !== 1 || n.classList.contains('pgap')) return;
       const t = n.tagName;
       if (t === 'UL' || t === 'OL') list(n, ctx, 0, out);
       else if (t === 'TABLE') table(n, ctx, out);

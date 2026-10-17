@@ -58,11 +58,11 @@
   $('#back').onchange = e => exec('hiliteColor', e.target.value);
 
   /* ---- layout ---- */
-  $('#margin').onchange = e => sheet.style.setProperty('--m', e.target.value + 'px');
+  $('#margin').onchange = e => { sheet.style.setProperty('--m', e.target.value + 'px'); paginate(); changed(); };
   const fit = () => {
     const z = $('#zoom').value;
     sheet.style.zoom = z === 'auto' ? Math.min(1, (innerWidth - 16) / 794) : z;
-    stats();
+    paginate();
   };
   $('#zoom').onchange = fit;
   addEventListener('resize', fit);
@@ -101,7 +101,7 @@
     redo: () => exec('redo'),
     docx: () => dl(DOCX.blob(ed, sheet.style.getPropertyValue('--m')), nm() + '.docx'),
     doc: exportDoc,
-    html: () => dl(new Blob(['<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><title>' + nm().replace(/</g, '&lt;') + '</title></head><body>' + ed.innerHTML + '</body></html>'], { type: 'text/html' }), nm() + '.html'),
+    html: () => dl(new Blob(['<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><title>' + nm().replace(/</g, '&lt;') + '</title></head><body>' + cleanHtml() + '</body></html>'], { type: 'text/html' }), nm() + '.html'),
     txt: () => dl(new Blob([ed.innerText], { type: 'text/plain' }), nm() + '.txt'),
     open: () => $('#opener').click(),
     rtl: () => { restore(); const r = getSelection().getRangeAt(0); [...ed.children].filter(n => r.intersectsNode(n)).forEach(n => { n.dir = n.dir === 'rtl' ? 'ltr' : 'rtl'; }); changed(); },
@@ -179,7 +179,7 @@
   };
 
   function exportDoc() {
-    const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>table{border-collapse:collapse}td{border:1px solid #000;padding:4px}body{font-family:Arial;font-size:12pt}</style></head><body>' + ed.innerHTML + '</body></html>';
+    const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>table{border-collapse:collapse}td{border:1px solid #000;padding:4px}body{font-family:Arial;font-size:12pt}</style></head><body>' + cleanHtml() + '</body></html>';
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob(['\ufeff', html], { type: 'application/msword' }));
     a.download = (titleEl.value || 'document') + '.doc';
@@ -187,25 +187,59 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
+  /* ---- পেজ ভাগ: ব্লক-স্তরে পেজ ভাঙা, ফাঁক (pgap) ঢুকিয়ে পরের পেজে ঠেলে দেওয়া ---- */
+  let pageCount = 1, pgT;
+  const schedulePg = () => { clearTimeout(pgT); pgT = setTimeout(paginate, 120); };
+  const cleanHtml = () => { const c = ed.cloneNode(true); c.querySelectorAll('.pgap').forEach(g => g.remove()); return c.innerHTML; };
+  function paginate() {
+    const z = sheet.style.zoom;
+    sheet.style.zoom = 1;
+    ed.querySelectorAll('.pgap').forEach(g => g.remove());
+    const m = parseInt(sheet.style.getPropertyValue('--m')) || 96, H = 1123, S = H + 16, body = H - 2 * m, top0 = ed.offsetTop;
+    let force = false, end = 0;
+    for (const b of [...ed.children]) {
+      const y = b.offsetTop - top0, h = b.offsetHeight, k = Math.floor(y / S), off = y - k * S;
+      let need = 0;
+      if (force && off > 0) need = S - off;
+      else if (off >= body) need = S - off;
+      else if (off > 0 && off + h > body && h <= body) need = S - off;
+      force = b.classList.contains('pb');
+      if (need > 0) {
+        const g = document.createElement('div');
+        g.className = 'pgap'; g.contentEditable = 'false'; g.style.height = need + 'px';
+        ed.insertBefore(g, b);
+        const d = b.offsetTop - top0 - (k + 1) * S;
+        if (d) g.style.height = Math.max(0, need - d) + 'px';
+      }
+      end = b.offsetTop - top0 + h;
+    }
+    pageCount = Math.max(1, Math.floor(Math.max(0, end - 1) / S) + 1);
+    sheet.style.minHeight = (pageCount * S - 16) + 'px';
+    sheet.style.zoom = z;
+    stats();
+  }
+  ed.addEventListener('load', schedulePg, true);
+
   /* ---- stats ---- */
   function stats() {
     const t = ed.innerText.trim();
     const words = t ? t.split(/\s+/).length : 0;
-    const pages = Math.max(1, Math.ceil((ed.offsetHeight + 192) / 1123));
-    $('#stats').textContent = `শব্দ: ${bn(words)}  ·  অক্ষর: ${bn(t.length)}  ·  পেজ (আনুমানিক): ${bn(pages)}`;
+    const pages = pageCount;
+    $('#stats').textContent = `শব্দ: ${bn(words)}  ·  অক্ষর: ${bn(t.length)}  ·  পেজ: ${bn(pages)}`;
   }
 
   /* ---- save / load ---- */
   function changed() {
     savedEl.textContent = 'সেভ হচ্ছে…';
     stats();
+    schedulePg();
     clearTimeout(timer);
     timer = setTimeout(save, 700);
   }
   async function save() {
     if (!cur.id) cur.id = 'd' + Date.now();
     try {
-      await DB.put({ id: cur.id, title: titleEl.value || 'নামহীন ডকুমেন্ট', html: ed.innerHTML, margin: sheet.style.getPropertyValue('--m'), updated: Date.now() });
+      await DB.put({ id: cur.id, title: titleEl.value || 'নামহীন ডকুমেন্ট', html: cleanHtml(), margin: sheet.style.getPropertyValue('--m'), updated: Date.now() });
       try { localStorage.setItem('word-editor.last', cur.id); } catch (e) {}
       savedEl.textContent = 'সেভ হয়েছে';
     } catch (e) { savedEl.textContent = 'সেভ ব্যর্থ'; }
@@ -216,7 +250,7 @@
     ed.innerHTML = d.html || '<p><br></p>';
     sheet.style.setProperty('--m', d.margin || '96px');
     savedEl.textContent = 'সেভ হয়েছে';
-    stats();
+    paginate();
   };
   const fresh = () => load({ id: null, title: 'নামহীন ডকুমেন্ট', html: '<p><br></p>' });
   ed.addEventListener('input', changed);
