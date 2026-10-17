@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ওয়ার্ড এডিটর</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <button data-act="docs" data-icon="folder" title="আমার ডকুমেন্ট"></button>
+  <input id="title" value="নামহীন ডকুমেন্ট" aria-label="ডকুমেন্টের নাম">
+  <span id="saved" class="saved"></span>
+  <button data-act="undo" data-icon="undo" title="Undo"></button>
+  <button data-act="redo" data-icon="redo" title="Redo"></button>
+  <button data-act="docx" data-icon="download" title="Word (.doc) ডাউনলোড"></button>
+</header>
+
+<nav class="tabs">
+  <button class="on" data-tab="home">হোম</button>
+  <button data-tab="insert">ইনসার্ট</button>
+  <button data-tab="layout">লেআউট</button>
+</nav>
+
+<section class="ribbon">
+  <div class="pane on" data-pane="home">
+    <select id="font" title="ফন্ট">
+      <option value="Arial">Arial</option><option value="Times New Roman">Times New Roman</option>
+      <option value="Georgia">Georgia</option><option value="Verdana">Verdana</option>
+      <option value="Tahoma">Tahoma</option><option value="Courier New">Courier New</option>
+    </select>
+    <select id="size" title="সাইজ">
+      <option>8</option><option>9</option><option>10</option><option>11</option><option selected>12</option>
+      <option>14</option><option>16</option><option>18</option><option>24</option><option>36</option><option>48</option>
+    </select>
+    <select id="style" title="স্টাইল">
+      <option value="p">সাধারণ</option><option value="h1">শিরোনাম ১</option>
+      <option value="h2">শিরোনাম ২</option><option value="h3">শিরোনাম ৩</option>
+    </select>
+    <i class="sep"></i>
+    <button data-cmd="bold" data-icon="bold" title="Bold"></button>
+    <button data-cmd="italic" data-icon="italic" title="Italic"></button>
+    <button data-cmd="underline" data-icon="underline" title="Underline"></button>
+    <button data-cmd="strikeThrough" data-icon="strike" title="Strikethrough"></button>
+    <label class="clr" title="টেক্সটের রঙ"><span data-icon="textcolor"></span><input type="color" id="fore" value="#c00000"></label>
+    <label class="clr" title="হাইলাইট"><span data-icon="marker"></span><input type="color" id="back" value="#ffff00"></label>
+    <i class="sep"></i>
+    <button data-cmd="justifyLeft" data-icon="alignL" title="বামে"></button>
+    <button data-cmd="justifyCenter" data-icon="alignC" title="মাঝে"></button>
+    <button data-cmd="justifyRight" data-icon="alignR" title="ডানে"></button>
+    <button data-cmd="justifyFull" data-icon="alignJ" title="জাস্টিফাই"></button>
+    <i class="sep"></i>
+    <button data-cmd="insertUnorderedList" data-icon="ul" title="বুলেট"></button>
+    <button data-cmd="insertOrderedList" data-icon="ol" title="নম্বর"></button>
+    <button data-cmd="outdent" data-icon="outdent" title="ইন্ডেন্ট কমান"></button>
+    <button data-cmd="indent" data-icon="indent" title="ইন্ডেন্ট বাড়ান"></button>
+    <select id="lh" title="লাইন স্পেসিং">
+      <option value="1">১.০</option><option value="1.15" selected>১.১৫</option>
+      <option value="1.5">১.৫</option><option value="2">২.০</option>
+    </select>
+  </div>
+
+  <div class="pane" data-pane="insert">
+    <button data-act="table" data-icon="table" title="টেবিল"></button>
+    <button class="t" data-act="rowAdd">+সারি</button>
+    <button class="t" data-act="colAdd">+কলাম</button>
+    <button class="t" data-act="rowDel">−সারি</button>
+    <button class="t" data-act="colDel">−কলাম</button>
+    <button class="t" data-act="tblDel">টেবিল মুছুন</button>
+    <i class="sep"></i>
+    <button data-act="image" data-icon="image" title="ছবি"></button>
+    <button data-act="link" data-icon="link" title="লিংক"></button>
+    <button data-act="hr" data-icon="hr" title="আড়াআড়ি রেখা"></button>
+    <button data-act="pagebreak" data-icon="pagebreak" title="পেজ ব্রেক"></button>
+    <input type="file" id="file" accept="image/*" hidden>
+  </div>
+
+  <div class="pane" data-pane="layout">
+    <select id="margin" title="মার্জিন">
+      <option value="96">মার্জিন: সাধারণ (২.৫৪ সেমি)</option>
+      <option value="48">সংকীর্ণ (১.২৭ সেমি)</option>
+      <option value="144">প্রশস্ত (৩.৮ সেমি)</option>
+    </select>
+    <select id="zoom" title="জুম">
+      <option value="auto">জুম: ফিট</option><option value="0.75">৭৫%</option>
+      <option value="1">১০০%</option><option value="1.25">১২৫%</option>
+    </select>
+    <button data-act="find" data-icon="find" title="খুঁজুন ও বদলান"></button>
+    <button data-act="print" data-icon="print" title="প্রিন্ট / PDF"></button>
+  </div>
+</section>
+
+<div id="findbar" class="findbar" hidden>
+  <input id="fq" placeholder="খুঁজুন">
+  <input id="fr" placeholder="বদলে দিন">
+  <button class="t" data-act="findNext">পরের</button>
+  <button class="t" data-act="replace">বদলান</button>
+  <button class="t" data-act="replaceAll">সব বদলান</button>
+  <button data-act="find" data-icon="close" title="বন্ধ"></button>
+</div>
+
+<main class="desk" id="desk">
+  <article class="sheet" id="sheet"><div id="editor" contenteditable="true" spellcheck="true"><p><br></p></div></article>
+</main>
+
+<footer class="status"><span id="stats"></span></footer>
+
+<dialog id="docs">
+  <h2>আমার ডকুমেন্ট</h2>
+  <ul id="doclist"></ul>
+  <div class="row"><button class="t" id="newdoc">নতুন ডকুমেন্ট</button><button class="t" id="closedocs">বন্ধ করুন</button></div>
+</dialog>
+
+<script src="js/icons.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
